@@ -1,38 +1,41 @@
-from collections import namedtuple
-import altair as alt
-import math
-import pandas as pd
 import streamlit as st
+import librosa
+import numpy as np
+import tensorflow as tf
 
-"""
-# Welcome to Streamlit!
+# Charger le modèle de machine learning
+model = tf.keras.models.load_model('chemin_vers_votre_modele.h5')
 
-Edit `/streamlit_app.py` to customize this app to your heart's desire :heart:
+# Fonction pour extraire les caractéristiques audio
+def extract_features(file_path):
+    audio, _ = librosa.load(file_path, sr=22050)
+    mfccs = librosa.feature.mfcc(audio, sr=22050, n_mfcc=13)
+    features = np.mean(mfccs.T, axis=0)
+    return features
 
-If you have any questions, checkout our [documentation](https://docs.streamlit.io) and [community
-forums](https://discuss.streamlit.io).
+# Interface utilisateur avec Streamlit
+st.write("""
+# Prédiction audio avec Streamlit
 
-In the meantime, below is an example of what you can do with just a few lines of code:
-"""
+Cette application utilise un modèle de machine learning pour prédire une sortie en fonction d'un fichier audio chargé.
+""")
 
+# Chargement du fichier audio
+audio_file = st.file_uploader("Veuillez sélectionner un fichier audio", type=["wav"])
 
-with st.echo(code_location='below'):
-    total_points = st.slider("Number of points in spiral", 1, 5000, 2000)
-    num_turns = st.slider("Number of turns in spiral", 1, 100, 9)
-
-    Point = namedtuple('Point', 'x y')
-    data = []
-
-    points_per_turn = total_points / num_turns
-
-    for curr_point_num in range(total_points):
-        curr_turn, i = divmod(curr_point_num, points_per_turn)
-        angle = (curr_turn + 1) * 2 * math.pi * i / points_per_turn
-        radius = curr_point_num / total_points
-        x = radius * math.cos(angle)
-        y = radius * math.sin(angle)
-        data.append(Point(x, y))
-
-    st.altair_chart(alt.Chart(pd.DataFrame(data), height=500, width=500)
-        .mark_circle(color='#0068c9', opacity=0.5)
-        .encode(x='x:Q', y='y:Q'))
+if audio_file is not None:
+    # Extraction des caractéristiques du fichier audio
+    features = extract_features(audio_file)
+    
+    # Redimensionner les caractéristiques pour correspondre aux attentes du modèle
+    features = np.expand_dims(features, axis=0)
+    
+    # Prédiction avec le modèle
+    prediction = model.predict(features)
+    
+    # Affichage des résultats
+    st.subheader('Caractéristiques audio extraites:')
+    st.write(features)
+    
+    st.subheader('Prédiction:')
+    st.write(prediction)
