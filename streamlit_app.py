@@ -4,7 +4,7 @@ import numpy as np
 import tensorflow as tf
 
 # Charger le modèle de machine learning
-model = tf.keras.models.load_model('chemin_vers_votre_modele.h5')
+#model = tf.keras.models.load_model('chemin_vers_votre_modele.h5')
 
 # Fonction pour extraire les caractéristiques audio
 def extract_features(file_path):
@@ -20,22 +20,32 @@ st.write("""
 Cette application utilise un modèle de machine learning pour prédire une sortie en fonction d'un fichier audio chargé.
 """)
 
-# Chargement du fichier audio
-audio_file = st.file_uploader("Veuillez sélectionner un fichier audio", type=["wav"])
 
-if audio_file is not None:
-    # Extraction des caractéristiques du fichier audio
-    features = extract_features(audio_file)
+
+
+
+def main():
+    st.title('Presénce de la reine ')
+    st.subheader('on va pouvoir prédire grace au son des abielles dans la ruche si une reine est présente ou pas.')
+
+    # Chargement du fichier audio
+    audio_file = st.file_uploader("Veuillez sélectionner un fichier audio", type=["wav"])
+    if audio_file is not None:
+        # Extraction des caractéristiques du fichier audio
+        features = extract_features(audio_file)
     
-    # Redimensionner les caractéristiques pour correspondre aux attentes du modèle
-    features = np.expand_dims(features, axis=0)
+        # Redimensionner les caractéristiques pour correspondre aux attentes du modèle
+        features = np.expand_dims(features, axis=0)
     
-    # Prédiction avec le modèle
-    prediction = model.predict(features)
+        # Prédiction avec le modèle
+        prediction = model.predict(features)
     
-    # Affichage des résultats
-    st.subheader('Caractéristiques audio extraites:')
-    st.write(features)
+        # Affichage des résultats
+        st.subheader('Caractéristiques audio extraites:')
+        st.write(features)
     
-    st.subheader('Prédiction:')
-    st.write(prediction)
+        st.subheader('Prédiction:')
+        st.write(prediction)
+
+if __name__=='__main__':
+    main()
